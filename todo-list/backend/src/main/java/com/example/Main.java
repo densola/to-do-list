@@ -4,11 +4,20 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.InetSocketAddress;
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.SQLException;
+import java.util.Properties;
 
-import com.sun.net.httpserver.*;
+import com.sun.net.httpserver.HttpExchange;
+import com.sun.net.httpserver.HttpHandler;
+import com.sun.net.httpserver.HttpServer;
 
 public class Main {
     public static void main(String[] args) throws Exception {
+        // Connect to database
+        Connection conn = connectDB("jdbc:postgresql://localhost:5432/postgres");
+
         // Set up HTTP server
         int port = 8000; // TODO - don't hardcode port
 
@@ -17,6 +26,24 @@ public class Main {
 
         System.out.printf("Serving on port %d", port);
         server.start();
+    }
+
+    // TODO - hardcode, logging
+    public static Connection connectDB(String connURL) {
+        Connection conn = null;
+        Properties props = new Properties();
+
+        props.put("user", "postgres");
+        props.put("password", "");
+
+        try {
+            conn = DriverManager.getConnection(connURL, props);
+        } catch (SQLException e) {
+            System.out.println(e.toString());
+            System.exit(1);
+        }
+
+        return conn;
     }
 
     static class MyHandler implements HttpHandler {
