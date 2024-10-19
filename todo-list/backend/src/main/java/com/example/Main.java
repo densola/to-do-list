@@ -14,18 +14,17 @@ import com.sun.net.httpserver.HttpHandler;
 import com.sun.net.httpserver.HttpServer;
 
 public class Main {
+
+    // TODO - hardcode
     public static void main(String[] args) throws Exception {
         // Connect to database
         Connection conn = connectDB("jdbc:postgresql://localhost:5432/postgres");
 
         // Set up HTTP server
-        int port = 8000; // TODO - don't hardcode port
-
-        HttpServer server = HttpServer.create(new InetSocketAddress(port), 0);
-        server.createContext("/", new MyHandler());
-
-        System.out.printf("Serving on port %d", port);
+        int port = 8000;
+        HttpServer server = setupServer(port);
         server.start();
+        System.out.printf("Server on port %d\n", port);
     }
 
     // TODO - hardcode, logging
@@ -44,6 +43,22 @@ public class Main {
         }
 
         return conn;
+    }
+
+    // TODO - logging
+    public static HttpServer setupServer(int port) {
+        HttpServer s = null;
+
+        try {
+            s = HttpServer.create(new InetSocketAddress(port), 0);
+        } catch (IOException e) {
+            System.out.println(e.toString());
+            System.exit(1);
+        }
+
+        s.createContext("/", new MyHandler());
+
+        return s;
     }
 
     static class MyHandler implements HttpHandler {
