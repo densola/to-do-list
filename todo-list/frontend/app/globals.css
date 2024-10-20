@@ -23,6 +23,7 @@ body {
 
 .task {
   padding: 1rem 2rem;
+  margin-bottom: .5rem;
   border-radius: 35px;
   background: #b8b9f9;
   border: .5px #634582 solid;

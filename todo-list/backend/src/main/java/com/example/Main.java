@@ -56,12 +56,13 @@ public class Main {
             System.exit(1);
         }
 
-        s.createContext("/", new MyHandler());
+        s.createContext("/", new HandleIndex());
+        s.createContext("/getTasks", new HandleGetTasks());
 
         return s;
     }
 
-    static class MyHandler implements HttpHandler {
+    static class HandleIndex implements HttpHandler {
         @Override
         public void handle(HttpExchange t) throws IOException {
             StringBuilder request = new StringBuilder(); // part of response
@@ -83,6 +84,24 @@ public class Main {
 
             os.write(response.toString().getBytes());
             os.close();
+        }
+    }
+
+    static class HandleGetTasks implements HttpHandler {
+        @Override
+        public void handle(HttpExchange t) throws IOException {
+            if (!t.getRequestMethod().equals("GET")) {
+                return;
+            }
+
+            // TODO - obtain data from postgres, format to JSON.
+            String b = "{\"tasks\": [{\"name\": \"task one\",\"info\": \"foo\"},{\"name\": \"task two\",\"info\": \"bar\"}]}";
+            t.getResponseHeaders().set("Access-Control-Allow-Origin", "*");
+            t.sendResponseHeaders(200, b.length());
+
+            OutputStream oStream = t.getResponseBody();
+            oStream.write(b.getBytes());
+            oStream.close();
         }
     }
 }
