@@ -5,6 +5,8 @@ import java.io.OutputStream;
 import java.net.InetSocketAddress;
 import java.sql.Connection;
 import java.sql.DriverManager;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Properties;
 
@@ -21,7 +23,7 @@ public class Main {
 
         // Set up HTTP server
         int port = 8000;
-        HttpServer server = setupServer(port);
+        HttpServer server = setupServer(port, conn);
         server.start();
         System.out.printf("Server on port %d\n", port);
     }
@@ -45,7 +47,7 @@ public class Main {
     }
 
     // TODO - logging
-    public static HttpServer setupServer(int port) {
+    public static HttpServer setupServer(int port, Connection c) {
         HttpServer s = null;
 
         try {
@@ -55,26 +57,51 @@ public class Main {
             System.exit(1);
         }
 
-        s.createContext("/getTasks", new HandleGetTasks());
+        s.createContext("/getTasks", new HandleGetTasks(c));
 
         return s;
     }
 
     static class HandleGetTasks implements HttpHandler {
+        private final Connection db;
+
+        HandleGetTasks(Connection db) {
+            this.db = db;
+        }
+
         @Override
         public void handle(HttpExchange t) throws IOException {
             if (!t.getRequestMethod().equals("GET")) {
                 return;
             }
 
-            // TODO - obtain data from postgres, format to JSON.
-            String b = "{\"tasks\": [{\"name\": \"task one\",\"info\": \"foo\"},{\"name\": \"task two\",\"info\": \"bar\"}]}";
-            t.getResponseHeaders().set("Access-Control-Allow-Origin", "*");
-            t.sendResponseHeaders(200, b.length());
+            String response = "";
 
-            OutputStream oStream = t.getResponseBody();
-            oStream.write(b.getBytes());
-            oStream.close();
+            ResultSet results = null;
+            try {
+                PreparedStatement stmt = db.prepareStatement("SELECT name, info FROM tasks");
+                results = stmt.executeQuery();
+                response = getTasksJSON(results);
+            } catch (SQLException e) {
+                System.out.println(e.toString());
+            }
+
+            t.getResponseHeaders().set("Access-Control-Allow-Origin", "*");
+            t.sendResponseHeaders(200, response.length());
+
+            try (OutputStream oStream = t.getResponseBody()) {
+                oStream.write(response.getBytes());
+            }
+        }
+
+        private String getTasksJSON(ResultSet r) throws SQLException {
+            Tasks ts = new Tasks();
+
+            while (r.next()) {
+                ts.addTask(r.getString(1), r.getString(2));
+            }
+
+            return ts.toJSON();
         }
     }
 }
