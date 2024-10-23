@@ -1,7 +1,6 @@
 package com.example;
 
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.InetSocketAddress;
 import java.sql.Connection;
@@ -60,6 +59,7 @@ public class Main {
 
         s.createContext("/getTasks", new HandleGetTasks(c));
         s.createContext("/createTask", new HandleCreateTask(c));
+        s.createContext("/deleteTask", new HandleDeleteTask(c));
 
         return s;
     }
@@ -115,7 +115,7 @@ public class Main {
 
         @Override
         public void handle(HttpExchange t) throws IOException {
-            Task task = parseRequest(t.getRequestBody());
+            Task task = Task.parseRequest(t.getRequestBody());
 
             try {
                 PreparedStatement stmt = db.prepareStatement("INSERT INTO tasks (name, info) VALUES (?, ?)");
@@ -126,60 +126,27 @@ public class Main {
                 System.out.println(e.toString());
             }
         }
+    }
 
-        /**
-         * parseRequest parses the request body returning
-         * a Task.
-         * 
-         * @param inStream
-         * @return Task with name and info from submission data.
-         */
-        private Task parseRequest(InputStream inStream) {
-            StringBuilder builder = new StringBuilder();
-            Task task = new Task();
+    static class HandleDeleteTask implements HttpHandler {
+        private final Connection db;
 
-            try {
-                int i;
-                while ((i = inStream.read()) != -1) {
-                    if (isValidStreamVal(i)) {
-                        if (i == 43) {
-                            builder.append((char) 43);
-                        } else {
-                            builder.append((char) i);
-                        }
-                    } else {
-                        System.out.println("Error: Passing in invalid data.");
-                        throw new RuntimeException();
-                    }
-                }
-            } catch (IOException e) {
-                System.out.println(e.toString());
-            }
-
-            String request = builder.toString();
-            String[] tsk = request.split("&");
-
-            tsk[0] = tsk[0].replaceAll("name=", "");
-            tsk[0] = tsk[0].replaceAll("[+]", " ");
-
-            tsk[1] = tsk[1].replaceAll("info=", "");
-            tsk[1] = tsk[1].replaceAll("[+]", " ");
-
-            task.setName(tsk[0]);
-            task.setInfo(tsk[1]);
-
-            return task;
+        HandleDeleteTask(Connection db) {
+            this.db = db;
         }
 
-        /**
-         * isValidStream returns true if i is the ASCII int
-         * value for characters 0-9, A-Z, a-z, =, &, and space.
-         * 
-         * @param i
-         * @return
-         */
-        private boolean isValidStreamVal(int i) {
-            return ((47 < i && i < 58) || (64 < i && i < 91) || (96 < i && i < 123) || i == 61 || i == 38 || i == 43);
+        @Override
+        public void handle(HttpExchange t) throws IOException {
+            Task task = Task.parseRequest(t.getRequestBody());
+
+            try {
+                PreparedStatement stmt = db.prepareStatement("DELETE FROM tasks where name=? AND info=?");
+                stmt.setString(1, task.getName());
+                stmt.setString(2, task.getInfo());
+                stmt.executeUpdate();
+            } catch (SQLException e) {
+                System.out.println(e.toString());
+            }
         }
     }
 }
