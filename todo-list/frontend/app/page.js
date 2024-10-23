@@ -3,13 +3,6 @@
 import { useState, useEffect } from "react";
 
 export default function App() {
-    const TASKS = [
-        { name: "do task one", info: "more details provided here" },
-        { name: "do task two at 3pm", info: "lorem ipsum dolor sit amet" },
-        { name: "task three must be done", info: "yada yada yada" },
-    ];
-
-    // Get data
     const [tasks, setTasks] = useState([]);
 
     useEffect(() => {
@@ -24,21 +17,53 @@ export default function App() {
         fetchData();
     }, []);
 
+    const [showModal, setShowModal] = useState(false);
+
+    const handleModalClose = () => {
+        setShowModal(false);
+    };
+
+    const handleModalOpen = () => {
+        setShowModal(true);
+    };
+
     if (tasks.length == 0) {
-        return <h1><center>Loading...</center></h1>;
-    } else {
         return (
-            <div id="root">
-                {/* TODO - don't hardcode url*/}
-                {/* <form action="http://localhost:8000/" method="post">
+            <h1>
+                <center>Loading...</center>
+            </h1>
+        );
+    }
+
+    return (
+        <div id="root">
+            {/* TODO - don't hardcode url*/}
+            {/* <form action="http://localhost:8000/" method="post">
                 <input name="txt" type="text" />
                 <button type="submit">Submit</button>
                 </form> */}
-                <button className="btn-add">Add task</button>
-                <TaskList tasks={tasks}></TaskList>
+            <button className="btn-add" onClick={handleModalOpen}>
+                Add task
+            </button>
+            <TaskList tasks={tasks}></TaskList>
+            <Modal isOpen={showModal} doOnClose={handleModalClose}></Modal>
+        </div>
+    );
+}
+
+function Modal({ isOpen, doOnClose }) {
+    if (!isOpen) return null;
+
+    return (
+        <div className="modal">
+            <div className="modal__content">
+                <p>add form here?</p>
+                <span className="modal__close" onClick={doOnClose}>
+                    &times;
+                </span>
             </div>
-        );
-    }
+        </div>
+    );
 }
 
 function TaskList({ tasks }) {
