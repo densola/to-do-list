@@ -1,10 +1,10 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 
 export default function App() {
     const [tasks, setTasks] = useState([]);
-
+    const [doneFetch, setDoneFetch] = useState(false);
     useEffect(() => {
         const searchUrl = "http://localhost:8000/getTasks";
 
@@ -12,22 +12,30 @@ export default function App() {
             const response = await fetch(searchUrl);
             const data = await response.json();
             setTasks(data.tasks);
+            setDoneFetch(true);
         };
 
         fetchData();
     }, []);
 
     const [showModal, setShowModal] = useState(false);
-
-    const handleModalClose = () => {
+    function handleModalClose() {
         setShowModal(false);
-    };
-
-    const handleModalOpen = () => {
+    }
+    function handleModalOpen() {
         setShowModal(true);
-    };
+    }
 
-    if (tasks.length == 0) {
+    const ref = useRef();
+    function handleSubmit(e) {
+        setTimeout(() => {
+            e.preventDefault();
+            ref.current.submit();
+            location.reload();
+        }, 100);
+    }
+
+    if (tasks.length == 0 && !doneFetch) {
         return (
             <h1>
                 <center>Loading...</center>
@@ -38,26 +46,39 @@ export default function App() {
     return (
         <div id="root">
             {/* TODO - don't hardcode url*/}
-            {/* <form action="http://localhost:8000/" method="post">
-                <input name="txt" type="text" />
-                <button type="submit">Submit</button>
-                </form> */}
             <button className="btn-add" onClick={handleModalOpen}>
                 Add task
             </button>
             <TaskList tasks={tasks}></TaskList>
-            <Modal isOpen={showModal} doOnClose={handleModalClose}></Modal>
+            <Modal isOpen={showModal} doOnClose={handleModalClose}>
+                <form
+                    ref={ref}
+                    action="http://localhost:8000/createTask"
+                    method="post"
+                    onSubmit={handleSubmit}
+                >
+                    <fieldset>
+                        <label htmlFor="name">Task:</label>
+                        <input name="name" type="text" maxLength={64} autoFocus />
+                    </fieldset>
+                    <fieldset>
+                        <label htmlFor="info">More task details:</label>
+                        <input name="info" type="text" />
+                    </fieldset>
+                    <button type="submit">Submit</button>
+                </form>
+            </Modal>
         </div>
     );
 }
 
-function Modal({ isOpen, doOnClose }) {
+function Modal({ isOpen, doOnClose, children }) {
     if (!isOpen) return null;
 
     return (
         <div className="modal">
             <div className="modal__content">
-                <p>add form here?</p>
+                {children}
                 <span className="modal__close" onClick={doOnClose}>
                     &times;
                 </span>
