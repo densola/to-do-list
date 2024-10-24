@@ -115,14 +115,14 @@ public class Main {
 
         @Override
         public void handle(HttpExchange t) throws IOException {
-            Task task = Task.parseRequest(t.getRequestBody());
 
             try {
+                Task task = Task.parseRequest(t.getRequestBody());
                 PreparedStatement stmt = db.prepareStatement("INSERT INTO tasks (name, info) VALUES (?, ?)");
                 stmt.setString(1, task.getName());
                 stmt.setString(2, task.getInfo());
                 stmt.executeUpdate();
-            } catch (SQLException e) {
+            } catch (Exception e) {
                 System.out.println(e.toString());
             }
         }

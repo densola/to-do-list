@@ -30,7 +30,7 @@ public class Task {
      * @param inStream
      * @return Task with name and info from submission data.
      */
-    public static Task parseRequest(InputStream inStream) {
+    public static Task parseRequest(InputStream inStream) throws RuntimeException {
         StringBuilder builder = new StringBuilder();
         Task task = new Task();
 
@@ -61,8 +61,12 @@ public class Task {
         tsk[1] = tsk[1].replaceAll("info=", "");
         tsk[1] = tsk[1].replaceAll("[+]", " ");
 
-        task.setName(tsk[0]);
-        task.setInfo(tsk[1]);
+        if (tsk[0].length() < 65) {
+            task.setName(tsk[0]);
+            task.setInfo(tsk[1]);
+        } else {
+            throw new RuntimeException("Task name over 64 characters.");
+        }
 
         return task;
     }
