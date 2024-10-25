@@ -1,11 +1,12 @@
 package com.example;
 
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.InetSocketAddress;
 import java.sql.Connection;
 import java.sql.DriverManager;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Properties;
 
@@ -22,7 +23,7 @@ public class Main {
 
         // Set up HTTP server
         int port = 8000;
-        HttpServer server = setupServer(port);
+        HttpServer server = setupServer(port, conn);
         server.start();
         System.out.printf("Server on port %d\n", port);
     }
@@ -46,7 +47,7 @@ public class Main {
     }
 
     // TODO - logging
-    public static HttpServer setupServer(int port) {
+    public static HttpServer setupServer(int port, Connection c) {
         HttpServer s = null;
 
         try {
@@ -56,33 +57,96 @@ public class Main {
             System.exit(1);
         }
 
-        s.createContext("/", new MyHandler());
+        s.createContext("/getTasks", new HandleGetTasks(c));
+        s.createContext("/createTask", new HandleCreateTask(c));
+        s.createContext("/deleteTask", new HandleDeleteTask(c));
 
         return s;
     }
 
-    static class MyHandler implements HttpHandler {
+    static class HandleGetTasks implements HttpHandler {
+        private final Connection db;
+
+        HandleGetTasks(Connection db) {
+            this.db = db;
+        }
+
         @Override
         public void handle(HttpExchange t) throws IOException {
-            StringBuilder request = new StringBuilder(); // part of response
-            StringBuilder response = new StringBuilder(); // sent as full response
-            InputStream ios = t.getRequestBody();
-
-            int i;
-            while ((i = ios.read()) != -1) {
-                String s = String.format("%d is %s\n", i, (char) i);
-                request.append((char) i);
-                response.append(s);
+            if (!t.getRequestMethod().equals("GET")) {
+                return;
             }
 
-            response.append("\nYour request was: ").append(request.toString());
+            String response = "";
 
-            OutputStream os = t.getResponseBody();
+            try {
+                PreparedStatement stmt = db.prepareStatement("SELECT name, info FROM tasks");
+                ResultSet results = stmt.executeQuery();
+                response = getTasksJSON(results);
+            } catch (SQLException e) {
+                System.out.println(e.toString());
+            }
+
             t.getResponseHeaders().set("Access-Control-Allow-Origin", "*");
             t.sendResponseHeaders(200, response.length());
 
-            os.write(response.toString().getBytes());
-            os.close();
+            try (OutputStream oStream = t.getResponseBody()) {
+                oStream.write(response.getBytes());
+            }
+        }
+
+        private String getTasksJSON(ResultSet r) throws SQLException {
+            Tasks ts = new Tasks();
+
+            while (r.next()) {
+                ts.addTask(r.getString(1), r.getString(2));
+            }
+
+            return ts.toJSON();
+        }
+    }
+
+    static class HandleCreateTask implements HttpHandler {
+        private final Connection db;
+
+        HandleCreateTask(Connection db) {
+            this.db = db;
+        }
+
+        @Override
+        public void handle(HttpExchange t) throws IOException {
+
+            try {
+                Task task = Task.parseRequest(t.getRequestBody());
+                PreparedStatement stmt = db.prepareStatement("INSERT INTO tasks (name, info) VALUES (?, ?)");
+                stmt.setString(1, task.getName());
+                stmt.setString(2, task.getInfo());
+                stmt.executeUpdate();
+            } catch (Exception e) {
+                System.out.println(e.toString());
+            }
+        }
+    }
+
+    static class HandleDeleteTask implements HttpHandler {
+        private final Connection db;
+
+        HandleDeleteTask(Connection db) {
+            this.db = db;
+        }
+
+        @Override
+        public void handle(HttpExchange t) throws IOException {
+            Task task = Task.parseRequest(t.getRequestBody());
+
+            try {
+                PreparedStatement stmt = db.prepareStatement("DELETE FROM tasks where name=? AND info=?");
+                stmt.setString(1, task.getName());
+                stmt.setString(2, task.getInfo());
+                stmt.executeUpdate();
+            } catch (SQLException e) {
+                System.out.println(e.toString());
+            }
         }
     }
 }

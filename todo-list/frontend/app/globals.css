@@ -1,27 +1,100 @@
-@tailwind base;
+/* @tailwind base;
 @tailwind components;
-@tailwind utilities;
+@tailwind utilities; */
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+* {
+    margin: 0px;
+    padding: 0px;
+    color: #6d467f;
+    font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
+        Roboto, Oxygen, Ubuntu, Cantarell, "Open Sans", "Helvetica Neue",
+        sans-serif;
 }
 
 body {
-  color: var(--foreground);
-  background: var(--background);
-  font-family: Arial, Helvetica, sans-serif;
+    background-color: #a497e9;
 }
 
-@layer utilities {
-  .text-balance {
-    text-wrap: balance;
-  }
+form > fieldset {
+    display: flex;
+    flex-direction: column;
+    border: none;
+    margin-bottom: 0.5rem;
+}
+
+#root {
+    margin: 1rem;
+}
+
+#root > * {
+    margin-bottom: 1rem;
+}
+
+.task {
+    padding: 1rem 2rem;
+    margin-bottom: 0.5rem;
+    border-radius: 1rem;
+    background: #b8b9f9;
+    border: 0.5px #634582 solid;
+}
+
+.task__header {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.task__title {
+    font-size: 1.5rem;
+}
+
+.btn-add {
+    font-weight: bold;
+    padding: 0.5rem 1rem;
+    background: rgb(166, 153, 235);
+    background: linear-gradient(
+        120deg,
+        rgba(166, 153, 235, 1) 0%,
+        rgba(193, 196, 247, 1) 61%,
+        rgba(241, 180, 197, 1) 100%
+    );
+    width: 100%;
+}
+
+.modal {
+    left: 0;
+    top: 0;
+    width: 100vw;
+    height: 100vh;
+
+    background-color: #00000066;
+    padding-top: 40vh;
+
+    position: fixed;
+    z-index: 1;
+    overflow: auto;
+}
+
+.modal__content {
+    width: 80vw;
+    background-color: #b8b9f9;
+
+    margin: auto;
+    padding: 1rem 2rem;
+    border: 1px solid #6d467f;
+    border-radius: 1rem;
+
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+}
+
+.modal__close {
+    color: #6d467f;
+    font-size: 28px;
+}
+
+.modal__close:hover,
+.modal__close:focus {
+    cursor: pointer;
 }
