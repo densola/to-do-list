@@ -122,7 +122,7 @@ public class Main {
                 stmt.setString(1, task.getName());
                 stmt.setString(2, task.getInfo());
                 stmt.executeUpdate();
-            } catch (Exception e) {
+            } catch (SQLException e) {
                 System.out.println(e.toString());
             }
         }
@@ -137,9 +137,8 @@ public class Main {
 
         @Override
         public void handle(HttpExchange t) throws IOException {
-            Task task = Task.parseRequest(t.getRequestBody());
-
             try {
+                Task task = Task.parseRequest(t.getRequestBody());
                 PreparedStatement stmt = db.prepareStatement("DELETE FROM tasks where name=? AND info=?");
                 stmt.setString(1, task.getName());
                 stmt.setString(2, task.getInfo());
