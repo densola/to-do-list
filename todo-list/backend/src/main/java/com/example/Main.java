@@ -60,6 +60,7 @@ public class Main {
         s.createContext("/getTasks", new HandleGetTasks(c));
         s.createContext("/createTask", new HandleCreateTask(c));
         s.createContext("/deleteTask", new HandleDeleteTask(c));
+        s.createContext("/editTask", new HandleEditTask(c));
 
         return s;
     }
@@ -80,7 +81,7 @@ public class Main {
             String response = "";
 
             try {
-                PreparedStatement stmt = db.prepareStatement("SELECT name, info FROM tasks");
+                PreparedStatement stmt = db.prepareStatement("SELECT name, info FROM tasks ORDER BY id DESC");
                 ResultSet results = stmt.executeQuery();
                 response = getTasksJSON(results);
             } catch (SQLException e) {
@@ -142,6 +143,30 @@ public class Main {
                 PreparedStatement stmt = db.prepareStatement("DELETE FROM tasks where name=? AND info=?");
                 stmt.setString(1, task.getName());
                 stmt.setString(2, task.getInfo());
+                stmt.executeUpdate();
+            } catch (SQLException e) {
+                System.out.println(e.toString());
+            }
+        }
+    }
+
+    static class HandleEditTask implements HttpHandler {
+        private final Connection db;
+
+        HandleEditTask(Connection db) {
+            this.db = db;
+        }
+
+        @Override
+        public void handle(HttpExchange t) throws IOException {
+            try {
+                Task[] tsks = Task.parseEditRequest(t.getRequestBody());
+                PreparedStatement stmt = db.prepareStatement("UPDATE tasks SET name=?, info=? WHERE name=? AND info=?");
+                stmt.setString(1, tsks[1].getName());
+                stmt.setString(2, tsks[1].getInfo());
+                stmt.setString(3, tsks[0].getName());
+                stmt.setString(4, tsks[0].getInfo());
+
                 stmt.executeUpdate();
             } catch (SQLException e) {
                 System.out.println(e.toString());

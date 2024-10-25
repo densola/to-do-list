@@ -18,12 +18,12 @@ export default function App() {
         fetchData();
     }, []);
 
-    const [showModal, setShowModal] = useState(false);
-    function handleModalClose() {
-        setShowModal(false);
+    const [showCreateModal, setShowCreateModal] = useState(false);
+    function handleCreateModalClose() {
+        setShowCreateModal(false);
     }
-    function handleModalOpen() {
-        setShowModal(true);
+    function handleCreateModalOpen() {
+        setShowCreateModal(true);
     }
 
     const ref = useRef();
@@ -46,11 +46,11 @@ export default function App() {
     return (
         <div id="root">
             {/* TODO - don't hardcode url*/}
-            <button className="btn-add" onClick={handleModalOpen}>
+            <button className="btn-add" onClick={handleCreateModalOpen}>
                 Add task
             </button>
             <TaskList tasks={tasks}></TaskList>
-            <Modal isOpen={showModal} doOnClose={handleModalClose}>
+            <Modal isOpen={showCreateModal} doOnClose={handleCreateModalClose}>
                 <form
                     ref={ref}
                     action="http://localhost:8000/createTask"
@@ -100,18 +100,79 @@ function TaskList({ tasks }) {
         }, 100);
     }
 
+    function handleEdit(e) {
+        setTimeout(() => {
+            e.preventDefault();
+            location.reload();
+        }, 100);
+    }
+
+    const [showEditModal, setShowEditModal] = useState(false);
+    const [toEditName, setToEditName] = useState("");
+    const [toEditInfo, setToEditInfo] = useState("");
+    function handleEditModalClose() {
+        setShowEditModal(false);
+    }
+    function handleEditModalOpen(e) {
+        const name = e.target.parentElement.children.name.value;
+        const info = e.target.parentElement.children.info.value;
+        setToEditName(name);
+        setToEditInfo(info);
+        setShowEditModal(true);
+    }
+
     const rows = [];
 
     let i = 0;
     tasks.forEach((task) => {
-        rows.push(<Task task={task} handleDelete={handleDelete} key={i} />);
+        rows.push(
+            <Task
+                task={task}
+                handleDelete={handleDelete}
+                showEdit={handleEditModalOpen}
+                key={i}
+            />
+        );
         i++;
     });
 
-    return <div>{rows}</div>;
+    return (
+        <div>
+            {rows}
+            <Modal isOpen={showEditModal} doOnClose={handleEditModalClose}>
+                <form
+                    action="http://localhost:8000/editTask"
+                    method="post"
+                    onSubmit={handleEdit}
+                >
+                    <input type="hidden" name="name" value={toEditName}></input>
+                    <input type="hidden" name="info" value={toEditInfo}></input>
+                    <fieldset>
+                        <label htmlFor="newname">Edit task:</label>
+                        <input
+                            name="newname"
+                            type="text"
+                            maxLength={64}
+                            defaultValue={toEditName}
+                            autoFocus
+                        />
+                    </fieldset>
+                    <fieldset>
+                        <label htmlFor="newinfo">Edit details:</label>
+                        <input
+                            name="newinfo"
+                            type="text"
+                            defaultValue={toEditInfo}
+                        />
+                    </fieldset>
+                    <button type="submit">Submit</button>
+                </form>
+            </Modal>
+        </div>
+    );
 }
 
-function Task({ task, handleDelete }) {
+function Task({ task, handleDelete, showEdit }) {
     return (
         <form
             action="http://localhost:8000/deleteTask"
@@ -125,6 +186,9 @@ function Task({ task, handleDelete }) {
                     <input className="task__checkbox" type="checkbox" />
                     <h5 className="task__title">{task.name}</h5>
                     <button type="submit">Delete</button>
+                    <button type="button" onClick={showEdit}>
+                        Edit
+                    </button>
                 </div>
                 <p className="task__desc">{task.info}</p>
             </div>
