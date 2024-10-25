@@ -59,7 +59,12 @@ export default function App() {
                 >
                     <fieldset>
                         <label htmlFor="name">Task:</label>
-                        <input name="name" type="text" maxLength={64} autoFocus />
+                        <input
+                            name="name"
+                            type="text"
+                            maxLength={64}
+                            autoFocus
+                        />
                     </fieldset>
                     <fieldset>
                         <label htmlFor="info">More task details:</label>
@@ -88,25 +93,41 @@ function Modal({ isOpen, doOnClose, children }) {
 }
 
 function TaskList({ tasks }) {
+    function handleDelete(e) {
+        setTimeout(() => {
+            e.preventDefault();
+            location.reload();
+        }, 100);
+    }
+
     const rows = [];
 
     let i = 0;
     tasks.forEach((task) => {
-        rows.push(<Task task={task} key={i} />);
+        rows.push(<Task task={task} handleDelete={handleDelete} key={i} />);
         i++;
     });
 
     return <div>{rows}</div>;
 }
 
-function Task({ task }) {
+function Task({ task, handleDelete }) {
     return (
-        <div className="task">
-            <div className="task__header">
-                <input className="task__checkbox" type="checkbox" />
-                <h5 className="task__title">{task.name}</h5>
+        <form
+            action="http://localhost:8000/deleteTask"
+            method="post"
+            onSubmit={handleDelete}
+        >
+            <div className="task">
+                <div className="task__header">
+                    <input type="hidden" value={task.name} name="name"></input>
+                    <input type="hidden" value={task.info} name="info"></input>
+                    <input className="task__checkbox" type="checkbox" />
+                    <h5 className="task__title">{task.name}</h5>
+                    <button type="submit">Delete</button>
+                </div>
+                <p className="task__desc">{task.info}</p>
             </div>
-            <p className="task__desc">{task.info}</p>
-        </div>
+        </form>
     );
 }
