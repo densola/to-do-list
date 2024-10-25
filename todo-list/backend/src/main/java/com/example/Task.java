@@ -72,6 +72,65 @@ public class Task {
     }
 
     /**
+     * parseEditRequest parses requests for editing tasks.
+     * 
+     * @param inStream
+     * @return
+     * @throws RuntimeException
+     */
+    public static Task[] parseEditRequest(InputStream inStream) throws RuntimeException {
+        StringBuilder builder = new StringBuilder();
+        Task task = new Task();
+        Task newTask = new Task();
+
+        try {
+            int i;
+            while ((i = inStream.read()) != -1) {
+                if (isValidStreamVal(i)) {
+                    if (i == 43) {
+                        builder.append((char) 43);
+                    } else {
+                        builder.append((char) i);
+                    }
+                } else {
+                    System.out.println("Error: Passing in invalid data.");
+                    throw new RuntimeException();
+                }
+            }
+        } catch (IOException e) {
+            System.out.println(e.toString());
+        }
+
+        String request = builder.toString();
+        String[] tsk = request.split("&");
+
+        tsk[0] = tsk[0].replaceAll("name=", "");
+        tsk[0] = tsk[0].replaceAll("[+]", " ");
+
+        tsk[1] = tsk[1].replaceAll("info=", "");
+        tsk[1] = tsk[1].replaceAll("[+]", " ");
+
+        tsk[2] = tsk[2].replaceAll("newname=", "");
+        tsk[2] = tsk[2].replaceAll("[+]", " ");
+
+        tsk[3] = tsk[3].replaceAll("newinfo=", "");
+        tsk[3] = tsk[3].replaceAll("[+]", " ");
+
+        if (tsk[0].length() < 65 || tsk[2].length() < 65) {
+            task.setName(tsk[0]);
+            task.setInfo(tsk[1]);
+            newTask.setName(tsk[2]);
+            newTask.setInfo(tsk[3]);
+        } else {
+            throw new RuntimeException("Task name over 64 characters.");
+        }
+
+        Task[] tasks = { task, newTask };
+
+        return tasks;
+    }
+
+    /**
      * isValidStream returns true if i is the ASCII int
      * value for characters 0-9, A-Z, a-z, =, &, and space.
      * 
