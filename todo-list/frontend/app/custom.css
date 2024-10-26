@@ -1,0 +1,85 @@
+* {
+    margin: 0px;
+    padding: 0px;
+    font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
+        Roboto, Oxygen, Ubuntu, Cantarell, "Open Sans", "Helvetica Neue",
+        sans-serif;
+}
+
+form > fieldset {
+    border: none;
+    display: flex;
+    flex-direction: column;
+    margin-bottom: 0px;
+}
+
+#root {
+    margin: 1rem;
+}
+
+.task {
+    background: var(--accent-bg);
+    border: 0.5px var(--border) solid;
+    display: flex;
+    gap: 1rem;
+    justify-content: space-between;
+    margin-bottom: 0.5rem;
+}
+
+.task button,
+.task .button {
+    height: max-content;
+    padding: 0.25rem;
+}
+
+.task__edit-btn {
+    cursor: pointer;
+    font-size: 1rem !important;
+    margin-right: 0.25rem;
+}
+
+.task__data {
+    display: flex;
+    flex-direction: column;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+}
+
+.add-btn {
+    font-weight: bold;
+    width: 100%;
+}
+
+.modal {
+    background-color: #00000080;
+    height: 100vh;
+    left: 0;
+    overflow: auto;
+    position: fixed;
+    top: 0;
+    width: 100vw;
+    z-index: 1;
+}
+
+.modal__content {
+    display: flex;
+    margin: auto;
+    margin-top: 5rem;
+    width: max-content;
+}
+
+.modal__close {
+    cursor: pointer;
+    font-size: 28px;
+}
+
+.modal form {
+    align-items: center;
+    display: flex;
+    flex-direction: column;
+}
+
+.modal button[type="submit"] {
+    padding-left: 2rem;
+    padding-right: 2rem;
+}

@@ -37,7 +37,7 @@ export default function App() {
 
     if (tasks.length == 0 && !doneFetch) {
         return (
-            <h1>
+            <h1 className="notice">
                 <center>Loading...</center>
             </h1>
         );
@@ -46,7 +46,7 @@ export default function App() {
     return (
         <div id="root">
             {/* TODO - don't hardcode url*/}
-            <button className="btn-add" onClick={handleCreateModalOpen}>
+            <button className="add-btn" onClick={handleCreateModalOpen}>
                 Add task
             </button>
             <TaskList tasks={tasks}></TaskList>
@@ -58,7 +58,9 @@ export default function App() {
                     onSubmit={handleSubmit}
                 >
                     <fieldset>
-                        <label htmlFor="name">Task:</label>
+                        <label htmlFor="name">
+                            <strong>Enter task:</strong>
+                        </label>
                         <input
                             name="name"
                             type="text"
@@ -67,10 +69,12 @@ export default function App() {
                         />
                     </fieldset>
                     <fieldset>
-                        <label htmlFor="info">More task details:</label>
-                        <input name="info" type="text" />
+                        <label htmlFor="info">
+                            <strong>Enter details:</strong>
+                        </label>
+                        <textarea name="info" type="text" />
                     </fieldset>
-                    <button type="submit">Submit</button>
+                    <button type="submit">Add</button>
                 </form>
             </Modal>
         </div>
@@ -82,7 +86,7 @@ function Modal({ isOpen, doOnClose, children }) {
 
     return (
         <div className="modal">
-            <div className="modal__content">
+            <div className="modal__content notice">
                 {children}
                 <span className="modal__close" onClick={doOnClose}>
                     &times;
@@ -113,9 +117,7 @@ function TaskList({ tasks }) {
     function handleEditModalClose() {
         setShowEditModal(false);
     }
-    function handleEditModalOpen(e) {
-        const name = e.target.parentElement.children.name.value;
-        const info = e.target.parentElement.children.info.value;
+    function handleEditModalOpen(e, name, info) {
         setToEditName(name);
         setToEditInfo(info);
         setShowEditModal(true);
@@ -148,7 +150,9 @@ function TaskList({ tasks }) {
                     <input type="hidden" name="name" value={toEditName}></input>
                     <input type="hidden" name="info" value={toEditInfo}></input>
                     <fieldset>
-                        <label htmlFor="newname">Edit task:</label>
+                        <label htmlFor="newname">
+                            <strong>Edit task:</strong>
+                        </label>
                         <input
                             name="newname"
                             type="text"
@@ -158,14 +162,16 @@ function TaskList({ tasks }) {
                         />
                     </fieldset>
                     <fieldset>
-                        <label htmlFor="newinfo">Edit details:</label>
-                        <input
+                        <label htmlFor="newinfo">
+                            <strong>Edit details:</strong>
+                        </label>
+                        <textarea
                             name="newinfo"
-                            type="text"
+                            type="textarea"
                             defaultValue={toEditInfo}
                         />
                     </fieldset>
-                    <button type="submit">Submit</button>
+                    <button type="submit">Done</button>
                 </form>
             </Modal>
         </div>
@@ -179,18 +185,24 @@ function Task({ task, handleDelete, showEdit }) {
             method="post"
             onSubmit={handleDelete}
         >
-            <div className="task">
-                <div className="task__header">
-                    <input type="hidden" value={task.name} name="name"></input>
-                    <input type="hidden" value={task.info} name="info"></input>
-                    <input className="task__checkbox" type="checkbox" />
-                    <h5 className="task__title">{task.name}</h5>
-                    <button type="submit">Delete</button>
-                    <button type="button" onClick={showEdit}>
-                        Edit
-                    </button>
+            <input type="hidden" value={task.name} name="name"></input>
+            <input type="hidden" value={task.info} name="info"></input>
+            <div className="task notice">
+                <div className="task__data">
+                    <h5 className="task__name">
+                        <span
+                            class="material-symbols-outlined task__edit-btn"
+                            onClick={(e) => showEdit(e, task.name, task.info)}
+                        >
+                            edit
+                        </span>
+                        <span>{task.name}</span>
+                    </h5>
+                    <span className="task__info">{task.info}</span>
                 </div>
-                <p className="task__desc">{task.info}</p>
+                <button type="submit">
+                    <span class="material-symbols-outlined">delete</span>
+                </button>
             </div>
         </form>
     );
