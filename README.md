@@ -1,6 +1,6 @@
-# TODO List
+# To-Do List
 
-A todo-list that allows you to create, edit, and delete tasks.
+A to-do list that allows you to create, edit, and delete tasks.
 
 ## Running the program
 
@@ -37,7 +37,7 @@ ALTER TABLE IF EXISTS public.tasks
 
 #### Postgres JDBC:
 
-In order for java to connect to postgres, the postgres JDBC driver must be set up. The driver is already in this project at: `todo-list/backend/src/main/java/com/example/postgresql-42.7.4.jar`. You can use this .jar for export to $CLASSPATH, which is essential for running the java server.
+In order for java to connect to postgres, the postgres JDBC driver must be set up. The driver is already in this project at: `to-do-list/backend/src/main/java/com/example/postgresql-42.7.4.jar`. You can use this .jar for export to $CLASSPATH, which is essential for running the java server.
 
 (Make sure the server for postgres is actually active before connecting/attempting to run the java server.)
 
@@ -48,7 +48,7 @@ Download [java](https://www.oracle.com/java/technologies/downloads/).
 After downloading java, you can run the backend server through the subsequent steps:
 
 1. Open a terminal
-2. Change directory into `todo-list/backend/src/main/java/com/example`
+2. Change directory into `to-do-list/backend/src/main/java/com/example`
 3. Run `export CLASSPATH=path/to/postgresql/jdbc/driver`. Make sure to replace `path/to/postgresql/jdbc/driver` with the path to the actual postgresql jdbc driver on your machine.
 4. Run `java Main.java`. This starts the server on **localhost:8000**
 
@@ -59,6 +59,6 @@ Download [Node.js and npm](https://docs.npmjs.com/downloading-and-installing-nod
 After downloading node and npm, you can run the frontend server through the subsequent steps:
 
 1. Open a terminal
-2. Change directory into `todo-list/frontend`
+2. Change directory into `to-do-list/frontend`
 3. Run `npm install`. This installs necessary packages
 4. Run `npm run dev`. This starts the server on **localhost:3000**
